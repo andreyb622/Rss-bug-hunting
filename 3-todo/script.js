@@ -12,6 +12,10 @@ let nextId = 1;
 
 function addTask() {
   const text = input.value;
+  if (text.trim() === "") {
+    errorEl.hidden = false;
+    return;
+  }
   errorEl.hidden = true;
   tasks.push({ id: nextId++, text: text, done: false });
   input.value = "";
@@ -20,12 +24,12 @@ function addTask() {
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
-  task.done = true;
+  task.done = !task.done;
   render();
 }
 
 function deleteTask(id) {
-  tasks.filter((t) => t.id !== id);
+  tasks = tasks.filter((t) => t.id !== id);
   render();
 }
 
@@ -35,7 +39,11 @@ function clearCompleted() {
 }
 
 function getVisibleTasks() {
-  return tasks;
+  return tasks.filter((t) => {
+    if (currentFilter === "all") return true;
+    if (currentFilter === "active") return !t.done;
+    if (currentFilter === "done") return t.done;
+  });
 }
 
 function updateCounter() {
@@ -44,7 +52,8 @@ function updateCounter() {
 
 function render() {
   const visible = getVisibleTasks();
-  for (let i = 1; i <= visible.length; i++) {
+  list.replaceChildren();
+  for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
     li.className = "task";
@@ -69,7 +78,7 @@ function render() {
   updateCounter();
 }
 
-addBtn.addEventListener("dblclick", addTask);
+addBtn.addEventListener("click", addTask);
 clearBtn.addEventListener("click", clearCompleted);
 
 filterButtons.forEach((btn) => {
